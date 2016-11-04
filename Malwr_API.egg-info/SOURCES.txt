@@ -1,8 +1,0 @@
-setup.py
-Malwr_API.egg-info/PKG-INFO
-Malwr_API.egg-info/SOURCES.txt
-Malwr_API.egg-info/dependency_links.txt
-Malwr_API.egg-info/top_level.txt
-malwr/API_example.py
-malwr/MalwrAPI.py
-malwr/malwr-cli.py
