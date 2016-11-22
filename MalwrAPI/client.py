@@ -11,7 +11,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-class MalwrAPI(object):
+class Client(object):
     """
         MalwrAPI Main Handler
     """
@@ -242,9 +242,9 @@ class MalwrAPI(object):
         }
         sc = self.session.post(search_url, data=payload, headers=self.headers)
         ssc = BeautifulSoup(sc.content, "html.parser")
-        
+
         output = {"IP": [], "Domain": []}
-       
+
         domains = ssc.find(id="domains").find_all("td")
         # Will go domain, IP, domain, IP
         for i in range(len(domains)):
@@ -252,10 +252,10 @@ class MalwrAPI(object):
                 # Domain
                 output["Domain"].append(domains[i].text)
             else:
-                # IP 
+                # IP
                 output["IP"].append(domains[i].text)
-    
+
         ips = ssc.find(id="hosts").find_all("td")
         output["IP"] += [x.text for x in ips]
-        
+
         return output

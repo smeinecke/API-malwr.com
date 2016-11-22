@@ -1,5 +1,5 @@
 #! /usr/bin/env python2
-from MalwrAPI import MalwrAPI
+import MalwrAPI
 import argparse
 import ConfigParser
 import os
@@ -53,10 +53,10 @@ if __name__ == "__main__":
                 'user': user,
                 'password': pwd
                 }
-        api = MalwrAPI(verbose=True, username=user, password=pwd)
+        api = MalwrAPI.Client(verbose=True, username=user, password=pwd)
     except:
         print('Trouble with ~/.malwr config file, authenticated features unavailable')
-        api = MalwrAPI(verbose=True)
+        api = MalwrAPI.Client(verbose=True)
 
     if args.search is not None:
         if os.path.isfile(args.search):

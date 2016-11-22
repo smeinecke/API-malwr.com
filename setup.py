@@ -8,5 +8,5 @@ setup(
     version="0.1",
     author="PaulSec",
     url="https://github.com/PaulSec/API-malwr.com",
-    packages=["malwr"]
+    packages=["MalwrAPI"]
 )
