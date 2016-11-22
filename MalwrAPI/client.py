@@ -59,6 +59,8 @@ class Client(object):
             url = self.url
 
         req = self.session.get(url, headers=self.headers)
+        if req.status_code != 200:
+            raise Exception("Response with error: %s %s" % (req.status_code, req.content))
         soup = BeautifulSoup(req.content, "html.parser")
         return soup
 
@@ -188,23 +190,31 @@ class Client(object):
 
         return res
 
-    def search(self, search_word):
+    def search(self, search_word, page = None):
         # Do nothing if not logged in
         if not self.logged:
             res = self.login()
             if res is False:
                 return False
 
-        search_url = self.url + '/analysis/search/'
-        c = self.request_to_soup(search_url)
+        if page is not None:
+            search_url = self.url + '/analysis/?page=%s' % (int(page), )
+            sc = self.session.get(search_url, headers=self.headers)
+        else:
+            search_url = self.url + '/analysis/search/'
+            c = self.request_to_soup(search_url)
 
-        csrf_input = c.find(attrs=dict(name='csrfmiddlewaretoken'))
-        csrf_token = csrf_input['value']
-        payload = {
-            'csrfmiddlewaretoken': csrf_token,
-            'search': u'{}'.format(search_word)
-        }
-        sc = self.session.post(search_url, data=payload, headers=self.headers)
+            csrf_input = c.find(attrs=dict(name='csrfmiddlewaretoken'))
+            csrf_token = csrf_input['value']
+            payload = {
+                'csrfmiddlewaretoken': csrf_token,
+                'search': u'{}'.format(search_word)
+            }
+            sc = self.session.post(search_url, data=payload, headers=self.headers)
+
+        if 'No results found.' in sc.content:
+            return []
+
         ssc = BeautifulSoup(sc.content, "html.parser")
 
         res = []
@@ -220,7 +230,9 @@ class Client(object):
                 'submission_time': infos[0].string,
                 'hash': infos[1].find('a').string,
                 'submission_url': infos[1].find('a')['href'],
-                'file_name': infos[2].string
+                'file_name': infos[2].string.strip(),
+                'file_type': infos[3].string.strip(),
+                'antivirus_ratio': infos[4].string.strip()
             }
             res.append(infos_to_add)
 
@@ -233,11 +245,15 @@ class Client(object):
             i_td = row.findAll('td')
             if not i_th[0].string:
                 continue
+
             ky = i_th[0].string.strip()
-            items[ky] = i_td[0].string.strip()
+            if i_td[0].string:
+                items[ky] = i_td[0].string.strip()
+            else:
+                items[ky] = None
         return items
 
-    def getReport(self, search_url, data = None):
+    def getReport(self, analysis_url, data = None):
         if not data:
             # Do nothing if not logged in
             if not self.logged:
@@ -245,16 +261,9 @@ class Client(object):
                 if res is False:
                     return False
 
-            search_url = self.url + search_url
+            search_url = self.url + analysis_url
             c = self.request_to_soup(search_url)
-
-            csrf_input = c.find(attrs=dict(name='csrfmiddlewaretoken'))
-            csrf_token = csrf_input['value']
-            payload = {
-                'csrfmiddlewaretoken': csrf_token,
-            }
-            sc = self.session.post(search_url, data=payload, headers=self.headers)
-            data = sc.content
+            data = c.content
 
         ssc = BeautifulSoup(data, "html.parser")
 
