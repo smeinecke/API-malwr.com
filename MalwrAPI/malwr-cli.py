@@ -18,24 +18,24 @@ if __name__ == "__main__":
     parser.add_argument('-S', '--submit', help='Submit the file')
     parser.add_argument('-s', '--search', help='Search for the string or the file')
     parser.add_argument(
-            '-d', '--domains', help='List recent domains',
-            action="store_true"
+        '-d', '--domains', help='List recent domains',
+        action="store_true"
     )
     parser.add_argument(
-            '-t', '--tags', help='List public tags',
-            action="store_true"
+        '-t', '--tags', help='List public tags',
+        action="store_true"
     )
     parser.add_argument(
-            '-r', '--recent', help='List recent analyses',
-            action="store_true"
+        '-r', '--recent', help='List recent analyses',
+        action="store_true"
     )
     parser.add_argument(
-            '-p', '--private', help='Submit file as private',
-            action="store_true"
+        '-p', '--private', help='Submit file as private',
+        action="store_true"
     )
     parser.add_argument(
-            '-n', '--no-share', help='Do not shared the submitted file',
-            action="store_false"
+        '-n', '--no-share', help='Do not shared the submitted file',
+        action="store_false"
     )
     args = parser.parse_args()
 
@@ -49,10 +49,10 @@ if __name__ == "__main__":
         user = config.get('Malwr', 'user')
         pwd = config.get('Malwr', 'password')
         authentication = {
-                'apikey': apikey,
-                'user': user,
-                'password': pwd
-                }
+            'apikey': apikey,
+            'user': user,
+            'password': pwd
+        }
         api = MalwrAPI.Client(verbose=True, username=user, password=pwd)
     except:
         print('Trouble with ~/.malwr config file, authenticated features unavailable')
@@ -81,8 +81,8 @@ if __name__ == "__main__":
                     )
     elif args.submit is not None:
         res = api.submit_sample(
-                filepath=args.submit, share=args.no_share,
-                private=args.private
+            filepath=args.submit, share=args.no_share,
+            private=args.private
         )
         print('File submitted : https://malwr.com%s for %s (hash: %s)' % (res['analysis_link'], res['file'], res['md5']))
     elif args.domains:

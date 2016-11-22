@@ -248,7 +248,7 @@ class Client(object):
         domains = ssc.find(id="domains").find_all("td")
         # Will go domain, IP, domain, IP
         for i in range(len(domains)):
-            if i%2 == 0:
+            if i % 2 == 0:
                 # Domain
                 output["Domain"].append(domains[i].text)
             else:
