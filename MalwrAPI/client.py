@@ -267,13 +267,16 @@ class Client(object):
 
             if i % 2 == 0:
                 # Domain
-                output["Domain"].append(domains[i].text)
-            else:
+                if domains[i].text not in output["Domain"]:
+                    output["Domain"].append(domains[i].text)
+            elif domains[i].text not in output["IP"]:
                 # IP
                 output["IP"].append(domains[i].text)
 
         ips = ssc.find(id="hosts").find_all("td")
-        output["IP"] += [x.text for x in ips]
+        for x in ips:
+            if x.text not in output["IP"]:
+              output["IP"].append(x.text)
 
         output['FileDetails'] = self.__parseKyVlTable(ssc.find(id='file'))
         for sig in ssc.find(id="signatures").find_all("div", {'class': 'alert'}):
