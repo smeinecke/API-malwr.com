@@ -8,6 +8,7 @@ import hashlib
 
 import re
 import requests
+import datetime
 from bs4 import BeautifulSoup
 
 
@@ -257,7 +258,12 @@ class Client(object):
 
         ssc = BeautifulSoup(data, "html.parser")
 
-        output = {"IP": [], "Domain": [], "FileDetails": {}, "Signatures": [], "Antivirus": {}}
+        output = {"IP": [], "Domain": [], "FileDetails": {}, "Signatures": [], "Antivirus": {},
+                  "Started": None, "Completed": None}
+
+        infobox = ssc.find("section", id="information").find_all("td")
+        output['Started'] = datetime.datetime.strptime(infobox[1].string, "%Y-%m-%d %H:%M:%S")
+        output['Completed'] = datetime.datetime.strptime(infobox[2].string, "%Y-%m-%d %H:%M:%S")
 
         domains = ssc.find(id="domains").find_all("td")
         # Will go domain, IP, domain, IP
