@@ -262,10 +262,9 @@ class Client(object):
                     return False
 
             search_url = self.url + analysis_url
-            c = self.request_to_soup(search_url)
-            data = c.content
-
-        ssc = BeautifulSoup(data, "html.parser")
+            ssc = self.request_to_soup(search_url)
+        else:
+            ssc = BeautifulSoup(data, "html.parser")
 
         output = {"IP": [], "Domain": [], "FileDetails": {}, "Signatures": [], "Antivirus": {},
                   "Started": None, "Completed": None}
