@@ -225,29 +225,46 @@ class Client(object):
 
         return res
 
-    def getReport(self, search_url):
-        # Do nothing if not logged in
-        if not self.logged:
-            res = self.login()
-            if res is False:
-                return False
+    def __parseKyVlTable(self, tbl):
+        items = {}
+        for row in tbl.findAll("tr"):
+            i_th = row.findAll('th')
+            i_td = row.findAll('td')
+            if not i_th[0].string:
+                continue
+            ky = i_th[0].string.strip()
+            items[ky] = i_td[0].string.strip()
+        return items
 
-        search_url = self.url + search_url
-        c = self.request_to_soup(search_url)
+    def getReport(self, search_url, data = None):
+        if not data:
+            # Do nothing if not logged in
+            if not self.logged:
+                res = self.login()
+                if res is False:
+                    return False
 
-        csrf_input = c.find(attrs=dict(name='csrfmiddlewaretoken'))
-        csrf_token = csrf_input['value']
-        payload = {
-            'csrfmiddlewaretoken': csrf_token,
-        }
-        sc = self.session.post(search_url, data=payload, headers=self.headers)
-        ssc = BeautifulSoup(sc.content, "html.parser")
+            search_url = self.url + search_url
+            c = self.request_to_soup(search_url)
 
-        output = {"IP": [], "Domain": []}
+            csrf_input = c.find(attrs=dict(name='csrfmiddlewaretoken'))
+            csrf_token = csrf_input['value']
+            payload = {
+                'csrfmiddlewaretoken': csrf_token,
+            }
+            sc = self.session.post(search_url, data=payload, headers=self.headers)
+            data = sc.content
+
+        ssc = BeautifulSoup(data, "html.parser")
+
+        output = {"IP": [], "Domain": [], "FileDetails": {}, "Signatures": [], "Antivirus": {}}
 
         domains = ssc.find(id="domains").find_all("td")
         # Will go domain, IP, domain, IP
         for i in range(len(domains)):
+            if domains[i].text.strip() == '':
+                continue
+
             if i % 2 == 0:
                 # Domain
                 output["Domain"].append(domains[i].text)
@@ -257,5 +274,17 @@ class Client(object):
 
         ips = ssc.find(id="hosts").find_all("td")
         output["IP"] += [x.text for x in ips]
+
+        output['FileDetails'] = self.__parseKyVlTable(ssc.find(id='file'))
+        for sig in ssc.find(id="signatures").find_all("div", {'class': 'alert'}):
+            output["Signatures"].append(sig.string.strip())
+
+        sig = ssc.find(id="static_antivirus_tab").find_all("td")
+        for i in range(len(sig)):
+            if i % 2 == 0:
+                ky = sig[i].text.strip()
+            else:
+                vl = sig[i].text.strip()
+                output["Antivirus"][ky] = vl
 
         return output
