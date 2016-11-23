@@ -211,6 +211,8 @@ class Client(object):
                 'search': u'{}'.format(search_word)
             }
             sc = self.session.post(search_url, data=payload, headers=self.headers)
+            if sc.status_code != 200:
+                raise Exception("Response with error: %s %s" % (sc.status_code, sc.content))
 
         if 'No results found.' in sc.content:
             return []
