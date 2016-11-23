@@ -88,7 +88,7 @@ class Client(object):
 
     def get_recent_domains(self):
         """Get recent domains on index page
-        Returns a list of objects with keys domain_name and url_analysis"""
+        Returns a list of objects with keys domain_name and submission_url"""
         res = []
         soup = self.request_to_soup()
 
@@ -97,7 +97,7 @@ class Client(object):
             infos = domain.findAll('td')
             infos_to_add = {
                 'domain_name': infos[0].find('span').string,
-                'url_analysis': infos[1].find('a')['href']
+                'submission_url': infos[1].find('a')['href']
             }
             res.append(infos_to_add)
 
@@ -116,7 +116,6 @@ class Client(object):
         return res
 
     def get_recent_analyses(self):
-
         res = []
         soup = self.request_to_soup()
 
